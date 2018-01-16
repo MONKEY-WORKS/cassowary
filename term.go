@@ -19,42 +19,42 @@ func NewTerm(v *Variable, c float64) *Term {
 	}
 }
 
-func (c *Term) Value() float64 {
-	return c.coefficient * c.variable.Value
+func (term *Term) Value() float64 {
+	return term.coefficient * term.variable.Value
 }
 
-func (c *Term) IsConstant() bool {
+func (term *Term) IsConstant() bool {
 	return false
 }
 
-func (c *Term) asExpression() *Expression {
-	return NewExpression([]*Term{NewTerm(c.variable, c.coefficient)}, 0.0)
+func (term *Term) asExpression() *Expression {
+	return NewExpression([]*Term{NewTerm(term.variable, term.coefficient)}, 0.0)
 }
 
-func (p *Term) Add(member EquationMember) *Expression {
-	return p.asExpression().Add(member)
+func (term *Term) Add(member EquationMember) *Expression {
+	return term.asExpression().Add(member)
 }
 
-func (p *Term) Sub(member EquationMember) *Expression {
-	return p.asExpression().Sub(member)
+func (term *Term) Sub(member EquationMember) *Expression {
+	return term.asExpression().Sub(member)
 }
 
-func (p *Term) Div(member EquationMember) *Expression {
-	return p.asExpression().Div(member)
+func (term *Term) Div(member EquationMember) *Expression {
+	return term.asExpression().Div(member)
 }
 
-func (p *Term) Mult(member EquationMember) *Expression {
-	return p.asExpression().Mult(member)
+func (term *Term) Mult(member EquationMember) *Expression {
+	return term.asExpression().Mult(member)
 }
 
-func (c *Term) GreaterThanOrEqualTo(m EquationMember) *Constraint {
-	return c.asExpression().GreaterThanOrEqualTo(m)
+func (term *Term) GreaterThanOrEqualTo(m EquationMember) *Constraint {
+	return term.asExpression().GreaterThanOrEqualTo(m)
 }
 
-func (c *Term) LessThanOrEqualTo(m EquationMember) *Constraint {
-	return c.asExpression().LessThanOrEqualTo(m)
+func (term *Term) LessThanOrEqualTo(m EquationMember) *Constraint {
+	return term.asExpression().LessThanOrEqualTo(m)
 }
 
-func (c *Term) Equals(member EquationMember) *Constraint {
-	return c.asExpression().createConstraint(member, EqualTo)
+func (term *Term) Equals(member EquationMember) *Constraint {
+	return term.asExpression().createConstraint(member, EqualTo)
 }

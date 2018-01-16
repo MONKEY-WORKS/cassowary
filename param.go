@@ -63,14 +63,14 @@ func (p *Param) asExpression() *Expression {
 	return NewExpression([]*Term{NewTerm(p.Variable, 1.0)}, 0.0)
 }
 
-func (c *Param) GreaterThanOrEqualTo(m EquationMember) *Constraint {
-	return c.asExpression().GreaterThanOrEqualTo(m)
+func (p *Param) GreaterThanOrEqualTo(m EquationMember) *Constraint {
+	return p.asExpression().GreaterThanOrEqualTo(m)
 }
 
-func (c *Param) LessThanOrEqualTo(m EquationMember) *Constraint {
-	return c.asExpression().LessThanOrEqualTo(m)
+func (p *Param) LessThanOrEqualTo(m EquationMember) *Constraint {
+	return p.asExpression().LessThanOrEqualTo(m)
 }
 
-func (c *Param) Equals(member EquationMember) *Constraint {
-	return c.asExpression().createConstraint(member, EqualTo)
+func (p *Param) Equals(member EquationMember) *Constraint {
+	return p.asExpression().createConstraint(member, EqualTo)
 }

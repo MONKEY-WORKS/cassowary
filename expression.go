@@ -32,69 +32,69 @@ func FromExpression(exp *Expression) *Expression {
 	}
 }
 
-func (c *Expression) Value() float64 {
-	value := c.constant
-	for _, t := range c.terms {
+func (exp *Expression) Value() float64 {
+	value := exp.constant
+	for _, t := range exp.terms {
 		value += t.Value()
 	}
 	return value
 }
 
-func (c *Expression) IsConstant() bool {
-	return len(c.terms) == 0
+func (exp *Expression) IsConstant() bool {
+	return len(exp.terms) == 0
 }
 
-func (c *Expression) asExpression() *Expression {
-	return c
+func (exp *Expression) asExpression() *Expression {
+	return exp
 }
 
-func (c *Expression) Add(member EquationMember) *Expression {
+func (exp *Expression) Add(member EquationMember) *Expression {
 	if cm, ok := member.(*ConstantMember); ok {
-		return NewExpression(c.terms, c.constant+cm.value)
+		return NewExpression(exp.terms, exp.constant+cm.value)
 	}
 
 	if param, ok := member.(*Param); ok {
-		return NewExpression(append(c.terms, NewTerm(param.Variable, 1.0)), c.constant)
+		return NewExpression(append(exp.terms, NewTerm(param.Variable, 1.0)), exp.constant)
 	}
 
 	if term, ok := member.(*Term); ok {
-		return NewExpression(append(c.terms, term), c.constant)
+		return NewExpression(append(exp.terms, term), exp.constant)
 	}
 
 	if exp, ok := member.(*Expression); ok {
-		newArray := make([]*Term, len(c.terms)+len(exp.terms))
-		copy(newArray[0:len(c.terms)], c.terms)
-		copy(newArray[len(c.terms):], exp.terms)
+		newArray := make([]*Term, len(exp.terms)+len(exp.terms))
+		copy(newArray[0:len(exp.terms)], exp.terms)
+		copy(newArray[len(exp.terms):], exp.terms)
 
-		return NewExpression(newArray, c.constant+exp.constant)
+		return NewExpression(newArray, exp.constant+exp.constant)
 	}
 
 	fmt.Println("Unknown EquationMember " + fmt.Sprintf("%T", member))
 	panic("Unknown EquationMember " + fmt.Sprintf("%T", member))
 }
 
-func (c *Expression) Sub(member EquationMember) *Expression {
+func (exp *Expression) Sub(member EquationMember) *Expression {
 	if cm, ok := member.(*ConstantMember); ok {
-		return NewExpression(c.terms, c.constant-cm.value)
+		return NewExpression(exp.terms, exp.constant-cm.value)
 	}
 
 	if param, ok := member.(*Param); ok {
-		return NewExpression(append(c.terms, NewTerm(param.Variable, -1.0)), c.constant)
+		return NewExpression(append(exp.terms, NewTerm(param.Variable, -1.0)), exp.constant)
 	}
 
 	if term, ok := member.(*Term); ok {
-		return NewExpression(append(c.terms, NewTerm(term.variable, -term.coefficient)), c.constant)
+		return NewExpression(append(exp.terms, NewTerm(term.variable, -term.coefficient)), exp.constant)
 	}
 
 	if exp, ok := member.(*Expression); ok {
-		offset := len(c.terms)
+		offset := len(exp.terms)
 		newArray := make([]*Term, offset+len(exp.terms))
-		copy(newArray[0:offset], c.terms)
+		copy(newArray[0:offset], exp.terms)
 		for i, t := range exp.terms {
 			newArray[offset+i] = NewTerm(t.variable, -t.coefficient)
 		}
 
-		return NewExpression(newArray, c.constant-exp.constant)
+		return NewExpression(newArray, exp.constant-exp.constant)
 	}
 
 	panic("Unknown EquationMember " + fmt.Sprintf("%T", member))
@@ -105,8 +105,8 @@ type multiplication struct {
 	multiplicand float64
 }
 
-func (c *Expression) Mult(member EquationMember) *Expression {
-	args := c.findMultiplierAndMultiplicand(member)
+func (exp *Expression) Mult(member EquationMember) *Expression {
+	args := exp.findMultiplierAndMultiplicand(member)
 	if args == nil {
 		return nil //, errors.New("Could not find constant multiplicand or multiplier")
 	}
@@ -114,68 +114,68 @@ func (c *Expression) Mult(member EquationMember) *Expression {
 	return args.multiplier.applyMultiplicand(args.multiplicand) //, nil
 }
 
-func (c *Expression) Div(member EquationMember) *Expression {
+func (exp *Expression) Div(member EquationMember) *Expression {
 	if !member.IsConstant() {
 		return nil //, errors.New("The divisor was not a constant expression")
 	}
 
-	return c.applyMultiplicand(1.0 / member.Value()) //, nil
+	return exp.applyMultiplicand(1.0 / member.Value()) //, nil
 }
 
-func (c *Expression) findMultiplierAndMultiplicand(member EquationMember) *multiplication {
-	if !c.IsConstant() && !member.IsConstant() {
+func (exp *Expression) findMultiplierAndMultiplicand(member EquationMember) *multiplication {
+	if !exp.IsConstant() && !member.IsConstant() {
 		return nil
 	}
 
-	if c.IsConstant() {
+	if exp.IsConstant() {
 		return &multiplication{
 			member.asExpression(),
-			c.Value(),
+			exp.Value(),
 		}
 	} else { // so member is constant
 		return &multiplication{
-			c, // TODO(Johannes): maybe copy is better
+			exp, // TODO(Johannes): maybe copy is better
 			member.Value(),
 		}
 	}
 }
 
-func (c *Expression) applyMultiplicand(multiplicand float64) *Expression {
+func (exp *Expression) applyMultiplicand(multiplicand float64) *Expression {
 
-	terms := make([]*Term, len(c.terms))
-	for i, srcTerm := range c.terms {
+	terms := make([]*Term, len(exp.terms))
+	for i, srcTerm := range exp.terms {
 		terms[i] = NewTerm(srcTerm.variable, srcTerm.coefficient*multiplicand)
 	}
 
-	return NewExpression(terms, c.constant*multiplicand)
+	return NewExpression(terms, exp.constant*multiplicand)
 }
 
-func (c *Expression) GreaterThanOrEqualTo(member EquationMember) *Constraint {
-	return c.createConstraint(member, GreaterThanOrEqualTo)
+func (exp *Expression) GreaterThanOrEqualTo(member EquationMember) *Constraint {
+	return exp.createConstraint(member, GreaterThanOrEqualTo)
 }
 
-func (c *Expression) LessThanOrEqualTo(member EquationMember) *Constraint {
-	return c.createConstraint(member, LessThanOrEqualTo)
+func (exp *Expression) LessThanOrEqualTo(member EquationMember) *Constraint {
+	return exp.createConstraint(member, LessThanOrEqualTo)
 }
 
-func (c *Expression) Equals(member EquationMember) *Constraint {
-	return c.createConstraint(member, EqualTo)
+func (exp *Expression) Equals(member EquationMember) *Constraint {
+	return exp.createConstraint(member, EqualTo)
 }
 
-func (c *Expression) createConstraint(member EquationMember, rel Relation) *Constraint {
-	newTerms := make([]*Term, len(c.terms))
-	copy(newTerms, c.terms)
+func (exp *Expression) createConstraint(member EquationMember, rel Relation) *Constraint {
+	newTerms := make([]*Term, len(exp.terms))
+	copy(newTerms, exp.terms)
 
 	if cm, ok := member.(*ConstantMember); ok {
-		return NewConstraint(NewExpression(newTerms, c.constant-cm.value), rel)
+		return NewConstraint(NewExpression(newTerms, exp.constant-cm.value), rel)
 	}
 
 	if param, ok := member.(*Param); ok {
-		return NewConstraint(NewExpression(append(newTerms, NewTerm(param.Variable, -1.0)), c.constant), rel)
+		return NewConstraint(NewExpression(append(newTerms, NewTerm(param.Variable, -1.0)), exp.constant), rel)
 	}
 
 	if term, ok := member.(*Term); ok {
-		return NewConstraint(NewExpression(append(c.terms, NewTerm(term.variable, -term.coefficient)), c.constant), rel)
+		return NewConstraint(NewExpression(append(exp.terms, NewTerm(term.variable, -term.coefficient)), exp.constant), rel)
 	}
 
 	if exp, ok := member.(*Expression); ok {
@@ -183,7 +183,7 @@ func (c *Expression) createConstraint(member EquationMember, rel Relation) *Cons
 			newTerms = append(newTerms, NewTerm(t.variable, -t.coefficient))
 		}
 
-		return NewConstraint(NewExpression(newTerms, c.constant-exp.constant), rel)
+		return NewConstraint(NewExpression(newTerms, exp.constant-exp.constant), rel)
 	}
 
 	panic("You should never reach this point ;)")
