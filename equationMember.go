@@ -1,3 +1,7 @@
+// Copyright 2016 The Chromium Authors, 2018 Elco Industrie Automation GmbH. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package cassowary
 
 type EquationMember interface {
@@ -17,7 +21,7 @@ type EquationMember interface {
 
 	Sub(m EquationMember) *Expression
 
-	Mult(m EquationMember) *Expression //, error)
+	Mult(m EquationMember) *Expression
 
-	Div(m EquationMember) *Expression //, error)
+	Div(m EquationMember) *Expression
 }

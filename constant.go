@@ -1,3 +1,7 @@
+// Copyright 2016 The Chromium Authors, 2018 Elco Industrie Automation GmbH. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 package cassowary
 
 type ConstantMember struct {
@@ -24,20 +28,20 @@ func (c *ConstantMember) IsConstant() bool {
 	return true
 }
 
-func (p *ConstantMember) Add(member EquationMember) *Expression {
-	return p.asExpression().Add(member)
+func (c *ConstantMember) Add(member EquationMember) *Expression {
+	return c.asExpression().Add(member)
 }
 
-func (p *ConstantMember) Sub(member EquationMember) *Expression {
-	return p.asExpression().Sub(member)
+func (c *ConstantMember) Sub(member EquationMember) *Expression {
+	return c.asExpression().Sub(member)
 }
 
-func (p *ConstantMember) Div(member EquationMember) *Expression {
-	return p.asExpression().Div(member)
+func (c *ConstantMember) Div(member EquationMember) *Expression {
+	return c.asExpression().Div(member)
 }
 
-func (p *ConstantMember) Mult(member EquationMember) *Expression {
-	return p.asExpression().Mult(member)
+func (c *ConstantMember) Mult(member EquationMember) *Expression {
+	return c.asExpression().Mult(member)
 }
 
 func (c *ConstantMember) asExpression() *Expression {
