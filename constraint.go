@@ -17,13 +17,13 @@ type Constraint struct {
 
 	expression *Expression
 
-	priority Priority
+	Priority Priority
 }
 
 func NewConstraint(exp *Expression, rel Relation) *Constraint {
 	return &Constraint{
 		relation:   rel,
 		expression: exp,
-		priority:   PriorityRequired,
+		Priority:   PriorityRequired,
 	}
 }

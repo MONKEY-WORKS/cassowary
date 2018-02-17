@@ -61,12 +61,12 @@ func (exp *Expression) Add(member EquationMember) *Expression {
 		return NewExpression(append(exp.terms, term), exp.constant)
 	}
 
-	if exp, ok := member.(*Expression); ok {
-		newArray := make([]*Term, len(exp.terms)+len(exp.terms))
+	if exp2, ok := member.(*Expression); ok {
+		newArray := make([]*Term, len(exp.terms)+len(exp2.terms))
 		copy(newArray[0:len(exp.terms)], exp.terms)
-		copy(newArray[len(exp.terms):], exp.terms)
+		copy(newArray[len(exp.terms):], exp2.terms)
 
-		return NewExpression(newArray, exp.constant+exp.constant)
+		return NewExpression(newArray, exp.constant+exp2.constant)
 	}
 
 	fmt.Println("Unknown EquationMember " + fmt.Sprintf("%T", member))
@@ -86,15 +86,15 @@ func (exp *Expression) Sub(member EquationMember) *Expression {
 		return NewExpression(append(exp.terms, NewTerm(term.variable, -term.coefficient)), exp.constant)
 	}
 
-	if exp, ok := member.(*Expression); ok {
+	if exp2, ok := member.(*Expression); ok {
 		offset := len(exp.terms)
-		newArray := make([]*Term, offset+len(exp.terms))
+		newArray := make([]*Term, offset+len(exp2.terms))
 		copy(newArray[0:offset], exp.terms)
-		for i, t := range exp.terms {
+		for i, t := range exp2.terms {
 			newArray[offset+i] = NewTerm(t.variable, -t.coefficient)
 		}
 
-		return NewExpression(newArray, exp.constant-exp.constant)
+		return NewExpression(newArray, exp.constant-exp2.constant)
 	}
 
 	panic("Unknown EquationMember " + fmt.Sprintf("%T", member))
@@ -178,12 +178,12 @@ func (exp *Expression) createConstraint(member EquationMember, rel Relation) *Co
 		return NewConstraint(NewExpression(append(exp.terms, NewTerm(term.variable, -term.coefficient)), exp.constant), rel)
 	}
 
-	if exp, ok := member.(*Expression); ok {
-		for _, t := range exp.terms {
+	if exp2, ok := member.(*Expression); ok {
+		for _, t := range exp2.terms {
 			newTerms = append(newTerms, NewTerm(t.variable, -t.coefficient))
 		}
 
-		return NewConstraint(NewExpression(newTerms, exp.constant-exp.constant), rel)
+		return NewConstraint(NewExpression(newTerms, exp.constant-exp2.constant), rel)
 	}
 
 	panic("You should never reach this point ;)")

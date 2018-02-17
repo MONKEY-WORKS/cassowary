@@ -4,34 +4,42 @@
 
 package cassowary
 
+// Ensure that ConstantMember implements EquationMember interface
+var _ EquationMember = &ConstantMember{}
+
+// ConstantMember describes a constant part of an Expression which won't change when added to a Solver
 type ConstantMember struct {
 	value float64
 }
 
-var _ EquationMember = &ConstantMember{}
-
+// CM just creates a new ConstantMember containing the given constant specified by value
 func CM(value float64) *ConstantMember {
 	return NewConstantMember(value)
 }
 
+// NewConstantMember creates a new ConstantMember containing the given constant specified by value
 func NewConstantMember(value float64) *ConstantMember {
 	return &ConstantMember{
 		value: value,
 	}
 }
 
+// Value returns the value of this constant
 func (c *ConstantMember) Value() float64 {
 	return c.value
 }
 
+// IsConstant returns true if this EquationMember is a constant (Which is always true for constants)
 func (c *ConstantMember) IsConstant() bool {
 	return true
 }
 
+// Add creates an expression which represents the sum of this ConstantMember and another EquationMember
 func (c *ConstantMember) Add(member EquationMember) *Expression {
 	return c.asExpression().Add(member)
 }
 
+// Sub creates an expression which represents the
 func (c *ConstantMember) Sub(member EquationMember) *Expression {
 	return c.asExpression().Sub(member)
 }

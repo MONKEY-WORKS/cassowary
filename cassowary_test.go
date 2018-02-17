@@ -400,6 +400,57 @@ func TestMoreComplexSetup2(t *testing.T) {
 	fmt.Println(containerWidth.Value, childX.Value())
 }
 
+func TestMoreComplexSetup3(t *testing.T) {
+	containerWidth := NewVariable(1024)
+	containerHeight := NewVariable(768)
+
+	widthTerm := NewTerm(containerWidth, 1)
+	heightTerm := NewTerm(containerHeight, 1)
+
+	childX := NewParam(50)
+	childY := NewParam(50)
+	childCompWidth := NewParam(200)
+	childCompHeight := NewParam(100)
+
+	c1 := childX.Equals(widthTerm.Mult(CM(50.0 / 1024.0)))
+	c2 := childY.Equals(heightTerm.Mult(CM(50.0 / 768.0)))
+	c3 := childCompWidth.Equals(widthTerm.Mult(CM(200.0 / 1024.0)))
+	c3.Priority = PriorityStrong
+
+	c4 := childCompHeight.Equals(heightTerm.Mult(CM(100.0 / 1024.0)))
+	c5 := childCompWidth.GreaterThanOrEqualTo(CM(500))
+	c5.Priority = PriorityWeak
+
+	s := NewSolver()
+	err := s.AddConstraint(c5)
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.AddConstraint(c1)
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.AddConstraint(c2)
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.AddConstraint(c3)
+	if err != nil {
+		t.Error(err)
+	}
+	err = s.AddConstraint(c4)
+	if err != nil {
+		t.Error(err)
+	}
+
+	s.AddEditVariable(containerWidth, float64(PriorityStrong))
+	s.SuggestValueForVariable(containerWidth, 2048)
+
+	s.FlushUpdates()
+
+	fmt.Println(containerWidth.Value, childCompWidth.Value())
+}
+
 func TestConstraintUpdate(t *testing.T) {
 	left := NewParam(2.0)
 	right := NewParam(100.0)
@@ -411,4 +462,52 @@ func TestConstraintUpdate(t *testing.T) {
 	s.AddConstraint(c1)
 	s.AddConstraint(c2)
 	s.RemoveConstraint(c1)
+}
+
+func TestSolutionWithOptiomize(t *testing.T) {
+	p1 := NewParam(0)
+	p2 := NewParam(0)
+	p3 := NewParam(0)
+
+	container := NewParam(0)
+
+	solver := NewSolver()
+	solver.AddEditVariable(container.Variable, float64(PriorityStrong))
+	solver.SuggestValueForVariable(container.Variable, 100.0)
+
+	c1 := p1.GreaterThanOrEqualTo(CM(30.0))
+	c1.Priority = PriorityStrong
+
+	c2 := p1.Equals(p3)
+	c2.Priority = PriorityMedium
+
+	c3 := p2.Equals(CM(2.0).Mult(p1))
+
+	c4 := container.Equals(p1.Add(p2).Add(p3))
+
+	solver.AddConstraint(c1)
+	fmt.Println(solver.rows)
+	solver.AddConstraint(c2)
+	fmt.Println(solver.rows)
+	solver.AddConstraint(c3)
+	fmt.Println(solver.rows)
+	solver.AddConstraint(c4)
+	//solver.AddConstraints(c1, c2, c3, c4)
+	solver.FlushUpdates()
+
+	if container.Value() != 100.0 {
+		t.Error("Container value does not match expected one ", 100, ", was", container.Value())
+	}
+
+	if p1.Value() != 30.0 {
+		t.Error("P1 value does not match expected one ", 30, ", was", p1.Value())
+	}
+
+	if p2.Value() != 60.0 {
+		t.Error("P2 value does not match expected one ", 60, ", was", p2.Value())
+	}
+
+	if p3.Value() != 10.0 {
+		t.Error("P3 value does not match expected one ", 10, ", was", p3.Value())
+	}
 }

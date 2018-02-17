@@ -187,10 +187,10 @@ func (s *Solver) leavingSymbolForMarkerSymbol(marker *internal.Symbol) *internal
 
 func (s *Solver) removeConstraintEffects(c *Constraint, tag *internal.Tag) {
 	if tag.Marker.Type == internal.Error {
-		s.removeMarkerEffects(tag.Marker, float64(c.priority))
+		s.removeMarkerEffects(tag.Marker, float64(c.Priority))
 	}
 	if tag.Other.Type == internal.Error {
-		s.removeMarkerEffects(tag.Other, float64(c.priority))
+		s.removeMarkerEffects(tag.Other, float64(c.Priority))
 	}
 }
 
@@ -237,15 +237,15 @@ func (s *Solver) createRow(c *Constraint, tag *internal.Tag) *internal.Row {
 		tag.Marker = slack
 		row.InsertSymbol(slack, coefficient)
 
-		if c.priority < PriorityRequired {
+		if c.Priority < PriorityRequired {
 			error := &internal.Symbol{internal.Error}
 
 			tag.Other = error
 			row.InsertSymbol(error, -coefficient)
-			s.objective.InsertSymbol(error, coefficient)
+			s.objective.InsertSymbol(error, float64(c.Priority))
 		}
 	case EqualTo:
-		if c.priority < PriorityRequired {
+		if c.Priority < PriorityRequired {
 			errPlus := &internal.Symbol{internal.Error}
 			errMinus := &internal.Symbol{internal.Error}
 			tag.Marker = errPlus
@@ -253,8 +253,8 @@ func (s *Solver) createRow(c *Constraint, tag *internal.Tag) *internal.Row {
 			row.InsertSymbol(errPlus, -1.0)
 			row.InsertSymbol(errMinus, 1.0)
 
-			s.objective.InsertSymbol(errPlus, float64(c.priority))
-			s.objective.InsertSymbol(errMinus, float64(c.priority))
+			s.objective.InsertSymbol(errPlus, float64(c.Priority))
+			s.objective.InsertSymbol(errMinus, float64(c.Priority))
 		} else {
 			dummy := &internal.Symbol{internal.Dummy}
 			tag.Marker = dummy
@@ -294,15 +294,15 @@ func (s *Solver) chooseSubjectForRow(row *internal.Row, tag *internal.Tag) *inte
 func (s *Solver) addWithArtificalVariableOnRow(row *internal.Row) (bool, error) {
 	artificial := &internal.Symbol{internal.Slack}
 	s.rows[artificial] = internal.CopyRow(row)
-	artificialRow := internal.CopyRow(row)
+	s.artificial = internal.CopyRow(row)
 
-	err := s.optimizeObjectiveRow(artificialRow)
+	err := s.optimizeObjectiveRow(s.artificial)
 	if err != nil {
 		return false, err
 	}
 
-	success := internal.IsNearZero(artificialRow.Constant)
-	artificialRow = internal.NewRow(0)
+	success := internal.IsNearZero(s.artificial.Constant)
+	s.artificial = internal.NewRow(0)
 
 	if foundRow, ok := s.rows[artificial]; ok {
 		delete(s.rows, artificial)
@@ -422,7 +422,7 @@ func (s *Solver) AddEditVariable(v *Variable, priority float64) error {
 	}
 
 	constraint := NewConstraint(NewExpression([]*Term{NewTerm(v, 1.0)}, 0.0), EqualTo)
-	constraint.priority = Priority(priority)
+	constraint.Priority = Priority(priority)
 
 	s.AddConstraint(constraint)
 
