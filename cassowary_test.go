@@ -464,6 +464,41 @@ func TestConstraintUpdate(t *testing.T) {
 	s.RemoveConstraint(c1)
 }
 
+func TestRealUsecase(t *testing.T) {
+	containerWidth := NewVariable(1024)
+	widthTerm := NewTerm(containerWidth, 1)
+
+	childX := NewParam(50)
+	childCompWidth := NewParam(200)
+
+	child2X := NewParam(300)
+	child2CompWidth := NewParam(674350)
+
+	c1 := childX.Equals(widthTerm.Mult(CM(50.0 / 1024.0)))
+	c2 := childCompWidth.Equals(widthTerm.Mult(CM(200.0 / 1024.0)))
+	c2.Priority = PriorityWeak
+
+	c3 := childCompWidth.GreaterThanOrEqualTo(CM(200))
+	c3.Priority = PriorityStrong
+
+	c4 := child2X.Equals(childX.Add(childCompWidth).Add(CM(50)))
+	c5 := child2CompWidth.Equals(widthTerm.Sub(child2X).Sub(CM(50)))
+
+	s := NewSolver()
+	s.AddEditVariable(containerWidth, float64(PriorityStrong))
+	s.SuggestValueForVariable(containerWidth, 2048)
+	s.AddConstraints(c1, c2, c3, c4, c5)
+
+	s.FlushUpdates()
+
+	fmt.Println(containerWidth.Value, childCompWidth.Value(), child2CompWidth.Value())
+
+	s.SuggestValueForVariable(containerWidth, 500)
+	s.FlushUpdates()
+	fmt.Println(containerWidth.Value, childCompWidth.Value(), child2CompWidth.Value())
+
+}
+
 func TestSolutionWithOptiomize(t *testing.T) {
 	p1 := NewParam(0)
 	p2 := NewParam(0)
